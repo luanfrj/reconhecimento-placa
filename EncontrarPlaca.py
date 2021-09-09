@@ -46,7 +46,7 @@ def buscaRetanguloPlaca(source):
         ret, img_result = cv2.threshold(img_result, 90, 255, cv2.THRESH_BINARY)
         # cv2.imshow('IMG_BIN', img_result)
 
-        # desfoque
+        # desfoque gaussiano
         img_result = cv2.GaussianBlur(img_result, (5, 5), 0)
 
         # lista os contornos
