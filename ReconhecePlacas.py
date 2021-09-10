@@ -6,25 +6,27 @@ import imutils
 import pytesseract
 #import easyocr
 
-img = cv.imread('DCAM0003.JPG')
+
+
+img = cv.imread('images/cropped_parking_lot_10.JPG')
 gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
-#cv.imshow('IMG', img)
-#cv.imshow('IMG_GRAY', gray)
-
+# Converte a imagem para tons de cinza
 img_blur = cv.GaussianBlur(gray, (5, 5), 0)
 
-edged = img_blur.astype(np.float32) - gray.astype(np.float32)
-edged = np.where(edged < 2, 0, edged)
-edged = np.absolute(edged).astype(np.uint8)
-edged = cv.equalizeHist(edged)
+# edged = img_blur.astype(np.float32) - gray.astype(np.float32)
+# edged = np.where(edged < 2, 0, edged)
+# edged = np.absolute(edged).astype(np.uint8)
+# edged = cv.equalizeHist(edged)
+# _, edged = cv.threshold(edged, 127, 255, cv.THRESH_BINARY)
+
+edged = cv.Canny(img_blur, 70, 150) #Edge detection
 struct_elem = np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]], np.uint8)
-_, edged = cv.threshold(edged, 200, 255, cv.THRESH_BINARY)
-# edged = cv.dilate(edged, struct_elem, iterations = 1)
 
-# edged = cv.morphologyEx(edged, cv.MORPH_OPEN, struct_elem)
+# Dilata a imagem
+edged = cv.dilate(edged, struct_elem, iterations = 1)
 
-cv.imshow('IMG_EDGES', edged)
+#cv.imshow('IMG_EDGES', edged)
 
 # encontra os contornos da imagem
 keypoints = cv.findContours(edged.copy(), cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
@@ -53,23 +55,33 @@ for contour in contours:
     (x2, y2) = (np.max(x), np.max(y))
     cropped_image = gray[x1:x2+1, y1:y2+1]
 
-    # Faz a limiarização da imagem para convertê-la em uma imagem binária
-    _, cropped_image = cv.threshold(cropped_image, 80, 255, cv.THRESH_BINARY)
-    cropped_image = cv.morphologyEx(cropped_image, cv.MORPH_CLOSE, struct_elem)
-
     i = i + 1
+    imgName = 'IMG_CROP' + str(i)
+    cv.imshow(imgName, cropped_image)
+
+    # Faz a limiarização da imagem para convertê-la em uma imagem binária
+    _, cropped_image = cv.threshold(cropped_image, 50, 255, cv.THRESH_BINARY)
+
+    struct_elem = np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]], np.uint8)
+    cropped_image = cv.erode(cropped_image, struct_elem, iterations = 3)
+    # cropped_image = cv.morphologyEx(cropped_image, cv.MORPH_CLOSE, struct_elem)
+    # cropped_image = cv.morphologyEx(cropped_image, cv.MORPH_CLOSE, struct_elem)
+    # cropped_image = cv.morphologyEx(cropped_image, cv.MORPH_CLOSE, struct_elem)
+
     imgName = 'IMG_BIN' + str(i)
-    cv.imshow(imgName, new_image)
     cv.imshow(imgName, cropped_image)
 
     # Configura o Pytesseract
-    config = r'-c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 --psm 6'
+    config = r'-c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 --psm 7'
+    
     result = pytesseract.image_to_string(cropped_image, lang='eng', config=config)
+    result = result.replace("\n","").replace("\f","")
 
-    text = result
-    font = cv.FONT_HERSHEY_SIMPLEX
-    res = cv.putText(img_copy, text=text, org=(approx[0][0][0], approx[1][0][1]+60), fontFace=font, fontScale=1, color=(0,255,0), thickness=2, lineType=cv.LINE_AA)
-    res = cv.rectangle(img_copy, tuple(approx[0][0]), tuple(approx[2][0]), (0,255,0),3)
+    if len(result) >= 2:
+      text = result
+      font = cv.FONT_HERSHEY_SIMPLEX
+      res = cv.putText(img_copy, text=text, org=(approx[0][0][0], approx[1][0][1]+60), fontFace=font, fontScale=1, color=(0,255,0), thickness=2, lineType=cv.LINE_AA)
+      res = cv.rectangle(img_copy, tuple(approx[0][0]), tuple(approx[2][0]), (0,255,0),3)
     
 cv.imshow('Result', img_copy)
 

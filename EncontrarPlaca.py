@@ -105,10 +105,10 @@ def reconhecimentoOCR(img_roi):
         return
 
     config = r'-c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 --psm 6'
-    # saida = pytesseract.image_to_string(img_roi_ocr, lang='eng', config=config)
+    saida = pytesseract.image_to_string(img_roi_ocr, lang='eng', config=config)
 
-    # print(saida)
-    # #return saida
+    print(saida)
+    #return saida
 
 
 if __name__ == "__main__":
