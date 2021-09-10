@@ -6,7 +6,7 @@ import imutils
 import pytesseract
 #import easyocr
 
-
+print(os.listdir())
 
 img = cv.imread('images/cropped_parking_lot_10.JPG')
 gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
