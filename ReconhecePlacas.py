@@ -6,7 +6,7 @@ import imutils
 import pytesseract
 import os
 
-debug = True
+debug = 3
 
 def obtem_lista_imagens():
   return os.listdir('images/')
@@ -25,7 +25,7 @@ def detecta_reconhece_placa(img_file_name):
   struct_elem = np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]], np.uint8)
   edged = cv.dilate(edged, struct_elem, iterations = 1)
 
-  if (debug):
+  if (debug > 0):
     cv.imshow('IMG_EDGES', edged)
 
   # encontra os contornos da imagem
@@ -49,7 +49,7 @@ def detecta_reconhece_placa(img_file_name):
       new_image = cv.bitwise_and(img, img, mask=mask)
 
       i = i + 1
-      if(debug):
+      if(debug > 1):
         imgName = 'NEW_IMG' + str(i)
         cv.imshow(imgName, new_image)
 
@@ -58,7 +58,7 @@ def detecta_reconhece_placa(img_file_name):
       (x2, y2) = (np.max(x), np.max(y))
       cropped_image = gray[x1:x2+1, y1:y2+1]
 
-      if(debug):
+      if(debug > 2):
         imgName = 'IMG_CROP' + str(i)
         cv.imshow(imgName, cropped_image)
 
@@ -72,7 +72,7 @@ def detecta_reconhece_placa(img_file_name):
       struct_elem = np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]], np.uint8)
       cropped_image = cv.erode(cropped_image, struct_elem, iterations = 3)
 
-      if(debug):
+      if(debug > 3):
         imgName = 'IMG_BIN' + str(i)
         cv.imshow(imgName, cropped_image)
 
@@ -82,7 +82,7 @@ def detecta_reconhece_placa(img_file_name):
       result = pytesseract.image_to_string(cropped_image, lang='eng', config=config)
       result = result.replace("\n","").replace("\f","")
 
-      if len(result) >= 2:
+      if len(result) >= 0:
         text_result = result
         text = result
         font = cv.FONT_HERSHEY_SIMPLEX
